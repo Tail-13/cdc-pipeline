@@ -1,0 +1,70 @@
+name: Deploy Kafka and Postgres Services
+
+on: 
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-brokers:
+    runs-on: arch
+    strategy:
+      matrix:
+        include:
+          - host: "10.0.2.11"
+            env_file: "node1.env"
+          - host: "10.0.2.12"
+            env_file: "node2.env"
+          - host: "10.0.2.13"
+            env_file: "node3.env"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy Configuration to Broker
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ matrix.host }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "kafka-brokers/docker-compose.yml,kafka-brokers/${{ matrix.env_file }}"
+          target: "~/kafka-app"
+          strip_components: 1
+
+      - name: Start Kafka Container
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ matrix.host }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/kafka-app
+            mv ${{ matrix.env_file }} .env
+            docker compose down
+            docker compose up -d
+
+  deploy-database:
+    runs-on: arch
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy Configuration to Database Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: "10.0.2.10"
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "database-servers/docker-compose.yml"
+          target: "~/db-kafka"
+
+      - name: Start Database Container
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "10.0.2.10"
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/db-kafka
+            docker compose down
+            docker compose up -d
