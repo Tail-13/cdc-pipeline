@@ -27,6 +27,9 @@ const pool =  new Pool({
     connectionString: process.env.DATABASE_URL
 })
 
+console.log(await pool.query('SELECT NOW()'));
+
+
 app.get('/data', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM journals');
