@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy-brokers:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
         include:
@@ -44,7 +44,7 @@ jobs:
             docker compose up -d
 
   deploy-database:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: deploy-brokers
     steps:
       - name: Checkout repository
