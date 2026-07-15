@@ -1,3 +1,7 @@
+-- remove afte dev
+drop table if exists report;
+drop stream if exists journals_flat;
+
 CREATE STREAM IF NOT EXISTS journals_flat (
     payload STRUCT<
         after STRUCT<

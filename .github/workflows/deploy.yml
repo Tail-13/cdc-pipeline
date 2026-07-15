@@ -77,7 +77,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/db-kafka
-            docker compose down
+            docker compose down -v
             docker compose up -d
 
   seed-database:
@@ -108,82 +108,3 @@ jobs:
 
             # < use to use local file instead -f which use container file
             docker compose exec -T postgres-db psql -U TEST -d TEST < pg-init.sql
-  
-  setup-kafka-connect:
-    runs-on: self-hosted
-    needs: seed-database # Ensures database is ready first
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Copy Kafka Connect JSON to Server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: "10.0.2.10"
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "database-servers/kafka-connect-setup.json"
-          target: "~/db-kafka"
-          strip_components: 1
-
-      - name: Register Kafka Connector via Curl
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: "10.0.2.10"
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd ~/db-kafka
-
-            # 1. Define variables
-            CONNECTOR_NAME="pg-journals-connector"
-            KAFKA_URL="http://localhost:8083/connectors"
-            
-            # 2. Check if the connector already exists (returns HTTP status code 200 if it does)
-            STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$KAFKA_URL/$CONNECTOR_NAME")
-            
-            # 3. Conditional execution logic
-            if [ "$STATUS_CODE" -eq 200 ]; then
-              echo "Connector '$CONNECTOR_NAME' already exists. Updating configuration via PUT..."
-              
-              curl -s -X PUT \
-                -H "Content-Type: application/json" \
-                -d @kafka-connect-setup.json \
-                "$KAFKA_URL/$CONNECTOR_NAME/config"
-                
-            else
-              echo "Connector '$CONNECTOR_NAME' not found. Creating new connector via POST..."
-              
-              curl -s -X POST \
-                -H "Content-Type: application/json" \
-                -d @kafka-connect-setup.json \
-                "$KAFKA_URL"
-            fi
-  
-  setup-ksqldb:
-    runs-on: self-hosted
-    needs: setup-kafka-connect # Ensures Kafka Connect and data pipelines are up first
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Copy ksqlDB Queries to Server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: "10.0.2.10"
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "database-servers/ksql-init.sql" # Path to your SQL file in git
-          target: "~/db-kafka"
-          strip_components: 1
-
-      - name: Execute Queries via ksqlDB REST API
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: "10.0.2.10"
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd ~/db-kafka
-            echo "Sending SQL queries to ksqlDB REST API..."
-            docker compose exec -T ksqldb-server ksql http://localhost:8088 < ksql-init.sql

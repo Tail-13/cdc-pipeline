@@ -45,7 +45,7 @@ services:
       STATUS_STORAGE_REPLICATION_FACTOR: 3
 
       # timeout 2 minute to check for new connector configs
-      # CONNECT_CONFIG_STORAGE_RECALL_WINDOW_MS: "120000"
+      CONNECT_CONFIG_STORAGE_RECALL_WINDOW_MS: "120000"
 
   ksqldb-server:
     image: confluentinc/ksqldb-server:0.29.0
