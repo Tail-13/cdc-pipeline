@@ -34,7 +34,7 @@ services:
       VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
 
       # kafka cluster ip, port to external access
-      BOOTSTRAP_SERVERS: '10.0.2.11:9093,10.0.2.12:9093,10.0.2.13:9093'
+      BOOTSTRAP_SERVERS: '10.0.2.11:9092,10.0.2.12:9092,10.0.2.13:9092'
 
       # group cluster
       GROUP_ID: 1
@@ -45,8 +45,7 @@ services:
       STATUS_STORAGE_REPLICATION_FACTOR: 3
 
       # timeout 2 minute to check for new connector configs
-      CONNECT_CONFIG_STORAGE_RECALL_WINDOW_MS: "120000"
-
+      # CONNECT_CONFIG_STORAGE_RECALL_WINDOW_MS: "120000"
 
   ksqldb-server:
     image: confluentinc/ksqldb-server:0.29.0
