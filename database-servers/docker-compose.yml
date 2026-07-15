@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres_db
+    restart: always
+    network_mode: "host" 
+    command: >
+      postgres 
+      -c wal_level=logical 
+      -c max_wal_senders=4 
+      -c max_replication_slots=4
+    environment:
+      POSTGRES_USER: TEST
+      POSTGRES_PASSWORD: "1234"
+      POSTGRES_DB: TEST
+    # not needed in host network mode
+    # ports:
+    #   - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  kafka-connect:
+    image: debezium/connect:2.7.3.Final
+    container_name: kafka-connect
+    network_mode: "host"
+    restart: always
+    environment:
+      CONNECT_REST_ADVERTISED_HOST_NAME: '10.0.2.10'
+      
+      # kafka cluster ip
+      BOOTSTRAP_SERVERS: '10.0.2.11:9092,10.0.2.12:9092,10.0.2.13:9092'
+
+      # group cluster
+      GROUP_ID: 1
+
+      CONFIG_STORAGE_TOPIC: my_connect_configs
+      OFFSET_STORAGE_TOPIC: my_connect_offsets
+      STATUS_STORAGE_TOPIC: my_connect_statuses
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      # node cluster config
+      CONFIG_STORAGE_REPLICATION_FACTOR: 3
+      OFFSET_STORAGE_REPLICATION_FACTOR: 3
+      STATUS_STORAGE_REPLICATION_FACTOR: 3
+
+      # timeout 2 minute to check for new connector configs
+      CONNECT_CONFIG_STORAGE_RECALL_WINDOW_MS: "120000"
+
+      # read from start
+      KSQL_KSQL_STREAMS_AUTO_OFFSET_RESET: "earliest"
+
+  ksqldb-server:
+    image: confluentinc/ksqldb-server:0.29.0
+    restart: always
+    container_name: ksqldb-server
+    network_mode: "host"
+    environment:
+      KSQL_BOOTSTRAP_SERVERS: '10.0.2.11:9092,10.0.2.12:9092,10.0.2.13:9092'
+      KSQL_LISTENERS: http://0.0.0.0:8088
+      KSQL_KSQL_SERVICE_ID: my_ksqldb_cluster_
+      # connect to kafka connect
+      KSQL_KSQL_CONNECT_URL: http://127.0.0.1:8083
+
+volumes:
+  pgdata:
+    driver: local
