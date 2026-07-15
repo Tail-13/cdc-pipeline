@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:17-alpine
-    container_name: postgres_db
+    container_name: postgres-db
     restart: always
     network_mode: "host" 
     # setup for replication to kafka

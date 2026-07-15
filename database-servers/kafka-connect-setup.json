@@ -1,0 +1,17 @@
+{
+  "name": "pg-journals-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "tasks.max": "1",
+    "plugin.name": "pgoutput",
+    "database.hostname": "10.0.2.10",
+    "database.port": "5432",
+    "database.user": "TEST",
+    "database.password": "1234",
+    "database.dbname": "TEST",
+    "table.include.list": "public.journals",
+    "topic.prefix": "cdc_journal",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter"
+  }
+}
