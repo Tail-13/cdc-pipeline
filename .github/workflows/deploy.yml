@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy-brokers:
-    runs-on: arch
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
@@ -44,7 +44,8 @@ jobs:
             docker compose up -d
 
   deploy-database:
-    runs-on: arch
+    runs-on: ubuntu-latest
+    needs: deploy-brokers
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
