@@ -1,6 +1,6 @@
 services:
   kafka:
-    image: apache/kafka:4.3.1
+    image: apache/kafka:latest
     container_name: kafka-node
     network_mode: "host"
     restart: always
