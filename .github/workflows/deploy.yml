@@ -40,7 +40,9 @@ jobs:
           script: |
             cd ~/kafka-app
             mv ${{ matrix.env_file }} .env
-            docker compose down
+
+            # add -v to delete volume
+            docker compose down -v
 
             # delete existing container if it exists
             # docker rm -f kafka-node || true
