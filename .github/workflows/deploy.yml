@@ -43,7 +43,7 @@ jobs:
             docker compose down
 
             # delete existing container if it exists
-            docker rm -f kafka-node || true
+            # docker rm -f kafka-node || true
 
             docker compose up -d
 
@@ -74,6 +74,6 @@ jobs:
             docker compose down
 
             # delete existing container if it exists
-            docker rm -f kafka-node || true
+            # docker rm -f kafka-node || true
 
             docker compose up -d
