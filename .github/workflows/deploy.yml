@@ -180,7 +180,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/db-kafka
-
             echo "Sending SQL queries to ksqlDB REST API..."
-            
             docker compose exec -T ksqldb-server ksql http://localhost:8088 < ksql-init.sql
