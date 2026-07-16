@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  clean-brokers:
+  clean-all:
     runs-on: self-hosted
     steps:
       - name: clean Kafka Container
@@ -17,6 +17,18 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/kafka-app
+            # add -v to delete volume
+            docker compose down -v 
+            docker system prune -f
+
+      - name: clean tooling Container
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "10.0.2.10"
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/db-kafka
             # add -v to delete volume
             docker compose down -v 
             docker system prune -f
@@ -90,6 +102,7 @@ jobs:
             docker compose down -v --remove-orphans
             docker system prune -f --volumes
             docker compose up -d
+  
   seed-database:
     runs-on: self-hosted
     needs: deploy-database
