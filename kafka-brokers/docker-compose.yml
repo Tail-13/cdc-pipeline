@@ -5,7 +5,7 @@ services:
     network_mode: "host"
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/9092' || exit 1"]
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-cluster.sh cluster-id --bootstrap-server localhost:9092 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -29,6 +29,14 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3       # replication factor for the transaction state topic
       KAFKA_MIN_INSYNC_REPLICAS: 2                          # minimum number of replicas that must acknowledge a write for the write to be considered successful
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2                  # minimum number of in-sync replicas for the transaction state topic      
+
+      KAFKA_AUTO_LEADER_REBALANCE_ENABLE: 'true'
+      
+      # How often Kafka checks for partition leader imbalance (e.g., 300 seconds / 5 mins)
+      KAFKA_LEADER_IMBALANCE_CHECK_INTERVAL_SECONDS: '300'
+      
+      # Percentage of allowed imbalance per broker before a rebalance kicks off (e.g., 10%)
+      KAFKA_LEADER_IMBALANCE_PER_BROKER_PERCENTAGE: '10'
 
       KAFKA_LOG_DIRS: '/var/lib/kafka/data'
     volumes:

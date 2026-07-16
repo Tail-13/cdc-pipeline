@@ -42,14 +42,8 @@ jobs:
             mv ${{ matrix.env_file }} .env
 
             # add -v to delete volume
-            docker compose down -v
-
-            # delete existing container if it exists
-            # docker rm -f kafka-node || true
-
-            #clean up old data to avoid issues with Kafka cluster
-            sudo rm -rf /var/lib/kafka/data/*
-
+            docker compose down -v --remove-orphans
+            docker prune -f
             docker compose up -d
 
   deploy-database:
@@ -77,7 +71,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/db-kafka
-            docker compose down -v
+            docker compose down -v --remove-orphans
+            docker prune -f
             docker compose up -d
   seed-database:
     runs-on: self-hosted
