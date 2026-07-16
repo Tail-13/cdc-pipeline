@@ -67,7 +67,7 @@ services:
         condition: service_healthy
     environment:
       KSQL_LISTENERS: http://0.0.0.0:8088
-      KSQL_KSQL_SERVICE_ID: my_ksqldb_cluster_
+      KSQL_KSQL_SERVICE_ID: my_ksqldb_cluster_v2
 
       # Kafka cluster IPs
       KSQL_BOOTSTRAP_SERVERS: '10.0.2.11:9092,10.0.2.12:9092,10.0.2.13:9092'
