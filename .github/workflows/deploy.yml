@@ -34,7 +34,7 @@ jobs:
             docker system prune -f
 
   deploy-brokers:
-    needs: clean-brokers
+    needs: clean-all
     runs-on: self-hosted
     strategy:
       matrix:
