@@ -48,7 +48,7 @@ jobs:
             # docker rm -f kafka-node || true
 
             #clean up old data to avoid issues with Kafka cluster
-            # sudo rm -rf /var/lib/kafka/data/*
+            sudo rm -rf /var/lib/kafka/data/*
 
             docker compose up -d
 
