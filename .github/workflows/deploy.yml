@@ -72,7 +72,7 @@ jobs:
           script: |
             cd ~/db-kafka
             docker compose down -v --remove-orphans
-            docker prune -f
+            docker system prune -f --volumes
             docker compose up -d
   seed-database:
     runs-on: self-hosted

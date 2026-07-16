@@ -95,7 +95,8 @@ services:
       
       # 3. Processing Guarantees & Acks
       KSQL_STREAMS_PRODUCER_ACKS: "all"
-      KSQL_STREAMS_PRODUCER_MIN_INSYNC_REPLICAS: 2
+      # Replace the invalid producer property with the topic override property:
+      KSQL_STREAMS_TOPIC_MIN_INSYNC_REPLICAS: 2
       KSQL_KSQL_INTERNAL_TOPIC_REPLICATION_FACTOR: 3
       KSQL_KSQL_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
 
