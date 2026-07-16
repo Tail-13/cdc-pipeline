@@ -4,6 +4,12 @@ services:
     container_name: postgres-db
     restart: always
     network_mode: "host" 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-U", "TEST"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s
     # setup for replication to kafka
     command: >
       postgres 
@@ -51,11 +57,11 @@ services:
 
     healthcheck:
       # Pings the root REST API endpoint to ensure the workers are running
-      test: ["CMD", "curl", "-f", "http://localhost:8083/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8083/connectors"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 15s
+      start_period: 30s
 
   ksqldb-server:
     image: confluentinc/ksqldb-server:0.29.0
@@ -99,7 +105,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 15s
+      start_period: 30s
 
 volumes:
   pgdata:

@@ -15,8 +15,8 @@ CREATE STREAM IF NOT EXISTS journals_flat (
 ) WITH (
     KAFKA_TOPIC='cdc_journal.public.journals',
     VALUE_FORMAT='JSON'
-    PARTITIONS=3,
-    REPLICAS=3
+    -- PARTITIONS=3,
+    -- REPLICAS=3
 );
 
 CREATE TABLE IF NOT EXISTS report AS
