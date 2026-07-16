@@ -47,7 +47,7 @@ services:
       STATUS_STORAGE_REPLICATION_FACTOR: 3
 
       # timeout 2 minute to check for new connector configs
-      CONNECT_CONFIG_STORAGE_RECALL_WINDOW_MS: "120000"
+      CONFIG_STORAGE_RECALL_WINDOW_MS: "120000"
 
     healthcheck:
       # Pings the root REST API endpoint to ensure the workers are running
@@ -87,10 +87,12 @@ services:
       # 3. Processing Guarantees & Acks
       KSQL_KSQL_STREAMS_PRODUCER_ACKS: "all"
       KSQL_KSQL_STREAMS_PRODUCER_MIN_INSYNC_REPLICAS: "2"
+      KSQL_KSQL_INTERNAL_TOPIC_REPLICATION_FACTOR: "3"
+      KSQL_KSQL_OFFSETS_TOPIC_REPLICATION_FACTOR: "3"
 
       # 4. Enable Standby Replicas for instant failover
       KSQL_KSQL_STREAMS_NUM_STANDBY_REPLICAS: 1
-      
+
     healthcheck:
       # Uses the native kSQLdB health check REST resource
       test: ["CMD", "curl", "-f", "http://localhost:8088/healthcheck"]

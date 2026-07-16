@@ -78,7 +78,7 @@ jobs:
           script: |
             cd ~/db-kafka
             docker compose down -v
-            docker compose up -d --force-recreate ksqldb-server
+            docker compose up -d
   seed-database:
     runs-on: self-hosted
     needs: deploy-database
