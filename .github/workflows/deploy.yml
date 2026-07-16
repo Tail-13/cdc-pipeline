@@ -1,12 +1,28 @@
 name: Deploy Kafka and Postgres Services
 
-on: 
+on:
   push:
     branches:
       - main
 
 jobs:
+  clean-brokers:
+    runs-on: self-hosted
+    steps:
+      - name: clean Kafka Container
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "10.0.2.11,10.0.2.12,10.0.2.13"
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/kafka-app
+            # add -v to delete volume
+            docker compose down -v 
+            docker system prune -f
+
   deploy-brokers:
+    needs: clean-brokers
     runs-on: self-hosted
     strategy:
       matrix:
