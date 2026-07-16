@@ -26,7 +26,7 @@ services:
     network_mode: "host"
     restart: always
     environment:
-      CONNECT_REST_ADVERTISED_HOST_NAME: '10.0.2.10'
+      REST_ADVERTISED_HOST_NAME: '10.0.2.10'
 
       KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
@@ -35,28 +35,36 @@ services:
       BOOTSTRAP_SERVERS: '10.0.2.11:9092,10.0.2.12:9092,10.0.2.13:9092'
 
       # group cluster
-      GROUP_ID: 1
+      GROUP_ID: 'cdc-cluster'
 
       # node cluster config
       CONFIG_STORAGE_TOPIC: my_connect_configs
       OFFSET_STORAGE_TOPIC: my_connect_offsets
       STATUS_STORAGE_TOPIC: my_connect_statuses
+
       CONFIG_STORAGE_REPLICATION_FACTOR: 3
       OFFSET_STORAGE_REPLICATION_FACTOR: 3
       STATUS_STORAGE_REPLICATION_FACTOR: 3
 
-      CONNECT_CONFIG_STORAGE_MIN_IN_SYNC_REPLICAS: 2
-      CONNECT_OFFSET_STORAGE_MIN_IN_SYNC_REPLICAS: 2
-      CONNECT_STATUS_STORAGE_MIN_IN_SYNC_REPLICAS: 2
-
       # timeout 2 minute to check for new connector configs
       CONNECT_CONFIG_STORAGE_RECALL_WINDOW_MS: "120000"
+
+    healthcheck:
+      # Pings the root REST API endpoint to ensure the workers are running
+      test: ["CMD", "curl", "-f", "http://localhost:8083/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   ksqldb-server:
     image: confluentinc/ksqldb-server:0.29.0
     restart: always
     container_name: ksqldb-server
     network_mode: "host"
+    depends_on:
+      kafka-connect:
+        condition: service_healthy
     environment:
       KSQL_LISTENERS: http://0.0.0.0:8088
       KSQL_KSQL_SERVICE_ID: my_ksqldb_cluster_
@@ -68,11 +76,8 @@ services:
       KSQL_KSQL_STREAMS_AUTO_OFFSET_RESET: "earliest"
       
       # FIX: Ensure this points to the actual reachability path of Kafka Connect
-      KSQL_KSQL_CONNECT_URL: http://10.0.2.11:8083 
+      KSQL_KSQL_CONNECT_URL: http://10.0.2.10:8083 
 
-      # ==========================================
-      # High-Availability & Production Resiliency
-      # ==========================================
       # 1. KsqlDB Internal Config Topics
       KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: "3"
 
@@ -84,7 +89,15 @@ services:
       KSQL_KSQL_STREAMS_PRODUCER_MIN_INSYNC_REPLICAS: "2"
 
       # 4. Enable Standby Replicas for instant failover
-      KSQL_KSQL_STREAMS_NUM_STANDBY_REPLICAS: "1"
+      KSQL_KSQL_STREAMS_NUM_STANDBY_REPLICAS: 1
+      
+    healthcheck:
+      # Uses the native kSQLdB health check REST resource
+      test: ["CMD", "curl", "-f", "http://localhost:8088/healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
 volumes:
   pgdata:

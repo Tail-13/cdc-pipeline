@@ -4,6 +4,12 @@ services:
     container_name: kafka-node
     network_mode: "host"
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/9092' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     environment:
       KAFKA_NODE_ID: ${NODE_ID}
       CLUSTER_ID: 'Lwd5AsdFS5Sw5_plMxPFhw'
