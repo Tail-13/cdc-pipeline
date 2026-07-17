@@ -12,6 +12,13 @@
     "table.include.list": "public.journals",
     "topic.prefix": "cdc_journal",
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-    "key.converter": "org.apache.kafka.connect.json.JsonConverter"
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+
+    "decimal.handling.mode": "double",
+    
+    "topic.creation.default.replication.factor": "3",
+    "topic.creation.default.partitions": "3",
+    "topic.creation.default.cleanup.policy": "compact",
+    "topic.creation.default.min.insync.replicas": "2"
   }
 }

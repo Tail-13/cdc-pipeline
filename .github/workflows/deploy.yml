@@ -70,8 +70,7 @@ jobs:
             mv ${{ matrix.env_file }} .env
 
             # add -v to delete volume
-            docker compose down -v --remove-orphans
-            docker prune -f
+            docker compose down -v 
             docker compose up -d
 
   deploy-database:
@@ -99,10 +98,37 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/db-kafka
-            docker compose down -v --remove-orphans
-            docker system prune -f --volumes
+            docker compose down -v 
             docker compose up -d
   
+  deploy-kafka-ui:
+    runs-on: self-hosted
+    needs: deploy-brokers
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy Configuration to Kafka UI Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: "10.0.2.10"
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "kafka-ui/docker-compose.yml"
+          target: "~/kafka-ui"
+          strip_components: 1
+
+      - name: Start Kafka UI Container
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: "10.0.2.10"
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/kafka-ui
+            docker compose down -v 
+            docker compose up -d
+
   seed-database:
     runs-on: self-hosted
     needs: deploy-database

@@ -1,0 +1,19 @@
+services:
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    restart: always
+    network_mode: "host"
+    # healthcheck:
+    #   test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 5
+    #   start_period: 60s
+    # ports:
+    #   - "8000:8080"
+    environment:
+      PORT: 8000 # port to expose the UI 
+      DYNAMIC_CONFIG_ENABLED: 'true'
+      KAFKA_CLUSTERS_0_NAME: "kafka-cluster"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "10.0.2.11:9092, 10.0.2.12:9092, 10.0.2.13:9092"
